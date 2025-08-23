@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState, useRef, useEffect, useCallback } from "react";
+// import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ImageIcon } from "lucide-react";
 import { FlightData } from "@/lib/flight-parser";
-// @ts-ignore
 import Tesseract from 'tesseract.js';
 
 interface UnifiedFlightInputProps {
@@ -96,37 +95,68 @@ export function UnifiedFlightInput({
     return result.data.text;
   };
 
-  const parseFlightFromText = (text: string): FlightData => {
+  const parseFlightFromText = useCallback((text: string): FlightData => {
     console.log('Parsing text:', text);
     
     const flightData: FlightData = {};
     
-    // Enhanced airline detection with flight numbers
+    // Enhanced airline detection with flight numbers - comprehensive international list
     const airlinePatterns = [
-      /(?:^|\s)(American Airlines?|Delta|United|Southwest|JetBlue|Alaska|Spirit|Frontier|Allegiant|Hawaiian|Sun Country)(?:\s|$)/i,
-      /(?:^|\s)(AA|DL|UA|WN|B6|AS|NK|F9|G4|HA|SY)\s*(\d+)/i,
-      /Flight\s+(AA|DL|UA|WN|B6|AS|NK|F9|G4|HA|SY)\s*(\d+)/i,
-      /(American|Delta|United|Southwest|JetBlue|Alaska|Spirit|Frontier|Allegiant|Hawaiian|Sun Country)\s*(\d+)/i
+      // Full airline names
+      /(?:^|\s)(American Airlines?|Delta|United|Southwest|JetBlue|Alaska|Spirit|Frontier|Allegiant|Hawaiian|Sun Country|British Airways|Air France|Lufthansa|Emirates|Qatar Airways|Singapore Airlines|Cathay Pacific|Virgin Atlantic|KLM|Air Canada|Iberia|Turkish Airlines|Etihad Airways|All Nippon Airways|Avianca|Aeromexico|Aer Lingus|Royal Air Maroc|ExpressJet|FedEx Express|JSX|NetJets|Flexjet)(?:\s|$)/i,
+      // IATA codes with flight numbers (most common pattern)
+      /(?:^|\s)(AA|DL|UA|WN|B6|AS|NK|F9|G4|HA|SY|BA|AF|LH|EK|QR|SQ|CX|VS|KL|AC|IB|TK|EY|NH|AV|AM|EI|AT)\s*(\d+)/i,
+      // Flight prefix patterns
+      /Flight\s+(AA|DL|UA|WN|B6|AS|NK|F9|G4|HA|SY|BA|AF|LH|EK|QR|SQ|CX|VS|KL|AC|IB|TK|EY|NH|AV|AM|EI|AT)\s*(\d+)/i,
+      // Airline name with flight number
+      /(American|Delta|United|Southwest|JetBlue|Alaska|Spirit|Frontier|Allegiant|Hawaiian|Sun Country|British|Air France|Lufthansa|Emirates|Qatar|Singapore|Cathay|Virgin|KLM|Air Canada|Iberia|Turkish|Etihad|Nippon|Avianca|Aeromexico|Aer Lingus|Royal Air Maroc|ExpressJet|FedEx|JSX|NetJets|Flexjet)\s*(\d+)/i,
+      // Additional patterns for British Airways specifically (common OCR variations)
+      /British Airways.*?(\d+)/i,
+      /(BA)\s+(\d+)/i,
+      /Boeing\s+777.*(BA)\s+(\d+)/i  // Sometimes OCR picks up aircraft type with airline code
     ];
     
     for (const pattern of airlinePatterns) {
       const match = text.match(pattern);
       if (match) {
-        let airline = match[1];
+        const airline = match[1];
         const flightNumber = match[2]; // Flight number if captured
         
         const airlineMap: { [key: string]: string } = {
+          // US Airlines
           'AA': 'American Airlines', 'DL': 'Delta', 'UA': 'United',
           'WN': 'Southwest', 'B6': 'JetBlue', 'AS': 'Alaska',
           'NK': 'Spirit', 'F9': 'Frontier', 'G4': 'Allegiant',
-          'HA': 'Hawaiian', 'SY': 'Sun Country'
+          'HA': 'Hawaiian', 'SY': 'Sun Country',
+          // International Airlines
+          'BA': 'British Airways', 'AF': 'Air France', 'LH': 'Lufthansa',
+          'EK': 'Emirates', 'QR': 'Qatar Airways', 'SQ': 'Singapore Airlines',
+          'CX': 'Cathay Pacific', 'VS': 'Virgin Atlantic', 'KL': 'KLM',
+          'AC': 'Air Canada', 'IB': 'Iberia', 'TK': 'Turkish Airlines',
+          'EY': 'Etihad Airways', 'NH': 'All Nippon Airways', 'AV': 'Avianca',
+          'AM': 'Aeromexico', 'EI': 'Aer Lingus', 'AT': 'Royal Air Maroc',
+          // Partial name mappings for OCR
+          'British': 'British Airways', 'Air France': 'Air France',
+          'Qatar': 'Qatar Airways', 'Singapore': 'Singapore Airlines',
+          'Cathay': 'Cathay Pacific', 'Virgin': 'Virgin Atlantic',
+          'Air Canada': 'Air Canada', 'Turkish': 'Turkish Airlines',
+          'Etihad': 'Etihad Airways', 'Nippon': 'All Nippon Airways',
+          'Aeromexico': 'Aeromexico', 'Aer Lingus': 'Aer Lingus',
+          'Royal Air Maroc': 'Royal Air Maroc', 'ExpressJet': 'ExpressJet',
+          'FedEx': 'FedEx Express', 'JSX': 'JSX', 'NetJets': 'NetJets',
+          'Flexjet': 'Flexjet'
         };
         
-        const fullAirlineName = airlineMap[airline.toUpperCase()] || airline;
+        // Special handling for British Airways patterns
+        let fullAirlineName = airlineMap[airline.toUpperCase()] || airline;
+        if (airline.toLowerCase().includes('british airways') || airline.toLowerCase() === 'british') {
+          fullAirlineName = 'British Airways';
+        }
         
         // Include flight number if found
         if (flightNumber) {
-          flightData.airline = `${fullAirlineName} ${airline.toUpperCase()} ${flightNumber}`;
+          const airlineCode = airline.toUpperCase() === 'BRITISH' ? 'BA' : airline.toUpperCase();
+          flightData.airline = `${fullAirlineName} ${airlineCode} ${flightNumber}`;
           console.log('Found airline with flight number:', flightData.airline);
         } else {
           flightData.airline = fullAirlineName;
@@ -226,7 +256,7 @@ export function UnifiedFlightInput({
     for (const pattern of cabinPatterns) {
       const match = text.match(pattern);
       if (match) {
-        let cabin = match[1];
+        const cabin = match[1];
         const cabinMap: { [key: string]: string } = {
           'F': 'First', 'J': 'Business', 'W': 'Premium', 'Y': 'Economy',
           'Coach': 'Economy', 'Main': 'Economy'
@@ -238,7 +268,7 @@ export function UnifiedFlightInput({
     }
     
     return flightData;
-  };
+  }, []);
 
   const getMonthNumber = (monthName: string): string => {
     const months: { [key: string]: string } = {
@@ -249,7 +279,7 @@ export function UnifiedFlightInput({
     return months[monthName] || '01';
   };
 
-  const processImage = async (file: File) => {
+  const processImage = useCallback(async (file: File) => {
     try {
       console.log('Processing image:', file.name, file.size, 'bytes');
       
@@ -270,7 +300,7 @@ export function UnifiedFlightInput({
         cashPrice: undefined
       });
     }
-  };
+  }, [onFlightDataExtracted, parseFlightFromText]);
 
   // Drag and drop handlers
   const handleDragOver = (e: React.DragEvent) => {
@@ -323,7 +353,7 @@ export function UnifiedFlightInput({
 
     document.addEventListener('paste', handlePaste);
     return () => document.removeEventListener('paste', handlePaste);
-  }, []);
+  }, [processImage]);
 
   return (
     <div className="space-y-4">
