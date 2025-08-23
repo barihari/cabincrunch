@@ -19,7 +19,9 @@ export function FlightInfoCard({ flightData }: FlightInfoCardProps) {
     if (!dateStr) return 'Date not specified';
     
     try {
-      const date = new Date(dateStr);
+      // Parse date components manually to avoid timezone issues
+      const [year, month, day] = dateStr.split('-');
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
       console.log('Parsed date object:', date);
       const formatted = date.toLocaleDateString('en-US', {
         weekday: 'short',
@@ -39,7 +41,9 @@ export function FlightInfoCard({ flightData }: FlightInfoCardProps) {
     if (!dateStr) return 'Date TBD';
     
     try {
-      const date = new Date(dateStr);
+      // Parse date components manually to avoid timezone issues
+      const [year, month, day] = dateStr.split('-');
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
       return date.toLocaleDateString('en-US', {
         month: 'short', 
         day: 'numeric',
