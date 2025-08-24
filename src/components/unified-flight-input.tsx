@@ -394,7 +394,7 @@ export function UnifiedFlightInput({
             onClick={onSearch}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
-            {isLoading ? (loadingStep || 'Processing...') : 'Search Flight'}
+            Search Flight
           </Button>
         </div>
       </div>
