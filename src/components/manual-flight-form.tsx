@@ -6,19 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { FlightData } from "@/lib/flight-parser";
+import { SearchableAirlineSelect } from "@/components/searchable-airline-select";
 
 interface ManualFlightFormProps {
   flightData: FlightData;
   onFlightDataChange: (data: FlightData) => void;
 }
 
-const AIRLINES = [
-  "Royal Air Maroc",
-  "Delta",
-  "United", 
-  "British Airways",
-  "American Airlines"
-];
+
 
 export function ManualFlightForm({ flightData, onFlightDataChange }: ManualFlightFormProps) {
   const [localData, setLocalData] = useState<FlightData>({
@@ -83,21 +78,11 @@ export function ManualFlightForm({ flightData, onFlightDataChange }: ManualFligh
 
         <div className="space-y-2">
           <Label htmlFor="airline">Airline</Label>
-          <Select 
-            value={localData.airline || ''} 
+          <SearchableAirlineSelect
+            value={localData.airline || ''}
             onValueChange={(value) => updateField('airline', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select airline" />
-            </SelectTrigger>
-            <SelectContent>
-              {AIRLINES.map((airline) => (
-                <SelectItem key={airline} value={airline}>
-                  {airline}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            placeholder="Search or select airline"
+          />
         </div>
 
         <div className="space-y-2">

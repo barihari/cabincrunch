@@ -2,9 +2,38 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FlightData } from "@/lib/flight-parser";
+import { TransferPartnerCard } from "./transfer-partner-card";
+import { convertToAirlineData } from "@/lib/airline-data-converter";
 
 interface FlightInfoCardProps {
   flightData: FlightData;
+}
+
+function AmexPartnerInfo({ airline }: { airline?: string }) {
+  if (!airline) return null;
+  
+  const airlineData = convertToAirlineData(airline);
+  
+  if (!airlineData) {
+    return (
+      <div className="md:col-span-2 bg-red-50 border border-red-200 p-4 rounded-lg">
+        <dt className="font-medium text-sm text-red-800 mb-2">Amex Transfer Partner Status</dt>
+        <dd className="text-sm text-red-700">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+            <span className="font-medium">Not Available</span>
+          </div>
+          <p>No point path available.</p>
+        </dd>
+      </div>
+    );
+  }
+
+  return (
+    <div className="md:col-span-2">
+      <TransferPartnerCard airline={airlineData} />
+    </div>
+  );
 }
 
 export function FlightInfoCard({ flightData }: FlightInfoCardProps) {
@@ -61,7 +90,7 @@ export function FlightInfoCard({ flightData }: FlightInfoCardProps) {
           <CardTitle>Flight Summary</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Click "Load Sample Flight" above to see your CLT → ORD flight details.</p>
+          <p className="text-muted-foreground">Click &quot;Load Sample Flight&quot; above to see your CLT → ORD flight details.</p>
         </CardContent>
       </Card>
     );
@@ -113,6 +142,9 @@ export function FlightInfoCard({ flightData }: FlightInfoCardProps) {
               {flightData.airline || 'American Airlines'} AA2843 • {formatShortDate(flightData.departureDate)} • 10:20 AM → 11:30 AM • Direct (2h 10m)
             </dd>
           </div>
+
+          {/* Amex Transfer Partner Information */}
+          <AmexPartnerInfo airline={flightData.airline} />
         </div>
       </CardContent>
     </Card>

@@ -1,0 +1,131 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Airline Transfer Logic and Recommendation Schema",
+  "description": "Schema for airline transfer partner data used in CabinCrunch recommendation UI",
+  "type": "object",
+  "properties": {
+    "airlines": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/airline"
+      }
+    }
+  },
+  "required": ["airlines"],
+  "definitions": {
+    "airline": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full airline name",
+          "minLength": 1
+        },
+        "iataCode": {
+          "type": "string",
+          "description": "3-letter IATA airline code",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["Major US", "Regional", "Cargo", "Charter", "International"],
+          "description": "Airline category classification"
+        },
+        "isDirectPartner": {
+          "type": "boolean",
+          "description": "Whether this airline is a direct Amex transfer partner"
+        },
+        "isAllianceBookable": {
+          "type": "boolean",
+          "description": "Whether this airline can be booked through alliance partnerships"
+        },
+        "isBilateralBookable": {
+          "type": "boolean",
+          "description": "Whether this airline can be booked through bilateral partnerships"
+        },
+        "bookableVia": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Names of Amex partner programs that can book this airline",
+          "uniqueItems": true
+        },
+        "preferredPartner": {
+          "type": "string",
+          "description": "Preferred Amex partner for booking this airline - must match one of the values in bookableVia",
+          "minLength": 1
+        },
+        "transferRatio": {
+          "type": "string",
+          "description": "Transfer ratio from Amex points to airline miles",
+          "pattern": "^\\d+:\\d+$"
+        },
+        "transferTime": {
+          "type": "string",
+          "description": "Time required for points transfer to complete",
+          "minLength": 1
+        },
+        "howToBookSteps": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Plain English steps for booking this airline using points",
+          "minItems": 1
+        },
+        "notes": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          ],
+          "description": "Additional notes about surcharges, quirks, or booking tips"
+        }
+      },
+      "required": [
+        "name",
+        "category",
+        "isDirectPartner",
+        "isAllianceBookable",
+        "isBilateralBookable",
+        "bookableVia",
+        "preferredPartner",
+        "transferRatio",
+        "transferTime",
+        "howToBookSteps"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "bookableVia": {
+                "type": "array",
+                "minItems": 1
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "preferredPartner": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
