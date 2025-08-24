@@ -32,6 +32,23 @@ export function TransferPartnerCard({ airline }: TransferPartnerCardProps) {
     );
   };
 
+  const renderRecommendationReasons = () => {
+    if (!airline.recommendationReasons || airline.recommendationReasons.length === 0) return null;
+
+    return (
+      <div>
+        <h4 className="font-bold text-sm text-gray-900 mb-3">Why This Partner?</h4>
+        <ul className="list-disc list-inside space-y-1 text-sm text-gray-900">
+          {airline.recommendationReasons.map((reason, index) => (
+            <li key={index} className="leading-relaxed">
+              {reason}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
   return (
     <div className="mt-4">
       <h4 className="font-medium text-sm text-muted-foreground mb-3">
@@ -98,6 +115,9 @@ export function TransferPartnerCard({ airline }: TransferPartnerCardProps) {
                           ))}
                         </ol>
                       </div>
+
+                      {/* Recommendation reasons section */}
+                      {renderRecommendationReasons()}
 
                       {/* Notes section */}
                       {renderNotes()}

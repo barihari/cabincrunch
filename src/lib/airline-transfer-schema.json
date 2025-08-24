@@ -92,6 +92,14 @@
             }
           ],
           "description": "Additional notes about surcharges, quirks, or booking tips"
+        },
+        "recommendationReasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Plain-language reasons why this transfer partner is recommended over others"
         }
       },
       "required": [

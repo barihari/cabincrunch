@@ -63,6 +63,9 @@ export interface Airline {
   
   /** Additional notes about surcharges, quirks, or booking tips */
   notes?: string | string[];
+  
+  /** Plain-language reasons why this transfer partner is recommended over others */
+  recommendationReasons?: string[];
 }
 
 export interface AirlineTransferData {
