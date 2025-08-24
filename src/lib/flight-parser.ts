@@ -24,11 +24,18 @@ export function parseFlightSummary(text: string): FlightData {
     };
   }
 
-  // Common airline patterns
+  // Common airline patterns - matching our comprehensive list
   const airlines = [
-    'Royal Air Maroc', 'Delta', 'United', 'British Airways',
-    'American Airlines', 'Air France', 'KLM', 'Lufthansa',
-    'Emirates', 'Qatar Airways', 'Turkish Airlines'
+    // Major US Airlines
+    'Alaska Airlines', 'Allegiant Air', 'American Airlines', 'Delta Air Lines',
+    'Frontier Airlines', 'Hawaiian Airlines', 'JetBlue Airways', 'Southwest Airlines',
+    'Spirit Airlines', 'Sun Country Airlines', 'United Airlines',
+    
+    // International Airlines
+    'Aer Lingus', 'Aeromexico', 'Air Canada', 'Air France', 'All Nippon Airways',
+    'Avianca', 'British Airways', 'Cathay Pacific', 'Emirates', 'Etihad Airways',
+    'Iberia', 'KLM Royal Dutch Airlines', 'Lufthansa', 'Qatar Airways',
+    'Royal Air Maroc', 'Singapore Airlines', 'Turkish Airlines', 'Virgin Atlantic'
   ];
   
   // Try to find airline
@@ -96,21 +103,4 @@ export function parseFlightSummary(text: string): FlightData {
   }
 
   return flightData;
-}
-
-export function formatDate(dateStr: string): string {
-  if (!dateStr) return '';
-  
-  try {
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return dateStr;
-    
-    return date.toLocaleDateString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: '2-digit'
-    });
-  } catch {
-    return dateStr;
-  }
 }

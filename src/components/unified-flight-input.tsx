@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-// import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -11,8 +10,6 @@ import Tesseract from 'tesseract.js';
 
 interface UnifiedFlightInputProps {
   onFlightDataExtracted: (data: FlightData) => void;
-  isLoading: boolean;
-  loadingStep: string;
   onSearch: () => void;
   pastedText: string;
   onTextChange: (text: string) => void;
@@ -20,14 +17,11 @@ interface UnifiedFlightInputProps {
 
 export function UnifiedFlightInput({
   onFlightDataExtracted,
-  isLoading,
-  loadingStep,
   onSearch,
   pastedText,
   onTextChange
 }: UnifiedFlightInputProps) {
   const [isDragOver, setIsDragOver] = useState(false);
-  const [pasteActive, setPasteActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-detect content type

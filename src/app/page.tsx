@@ -61,8 +61,6 @@ export default function Home() {
         {/* Unified Flight Input */}
         <UnifiedFlightInput
           onFlightDataExtracted={setFlightData}
-          isLoading={false}
-          loadingStep={""}
           onSearch={handleSearch}
           pastedText={pastedText}
           onTextChange={handlePasteChange}
