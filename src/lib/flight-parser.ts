@@ -38,20 +38,52 @@ export function parseFlightSummary(text: string): FlightData {
     'Royal Air Maroc', 'Singapore Airlines', 'Turkish Airlines', 'Virgin Atlantic'
   ];
   
-  // Try to find airline
+  // Try to find airline (handle extra spaces and case issues)
+  const normalizedText = text.replace(/\s+/g, ' ').toLowerCase();
   for (const airline of airlines) {
-    if (text.toLowerCase().includes(airline.toLowerCase())) {
+    if (normalizedText.includes(airline.toLowerCase())) {
       flightData.airline = airline;
       break;
     }
   }
+  
+  // Also check for short airline codes and partial names
+  const airlineCodePatterns = [
+    { pattern: /\bUA\b/i, airline: 'United Airlines' },
+    { pattern: /\bUnited\b/i, airline: 'United Airlines' },
+    { pattern: /\bAA\b/i, airline: 'American Airlines' },
+    { pattern: /\bDL\b/i, airline: 'Delta Air Lines' },
+    { pattern: /\bWN\b/i, airline: 'Southwest Airlines' }
+  ];
+  
+  if (!flightData.airline) {
+    for (const { pattern, airline } of airlineCodePatterns) {
+      if (pattern.test(text)) {
+        flightData.airline = airline;
+        break;
+      }
+    }
+  }
 
-  // Extract airport codes (3-letter IATA codes)
-  const airportPattern = /\b[A-Z]{3}\b/g;
+  // Extract airport codes (3-letter IATA codes) - handle case insensitive
+  // Exclude common airline name words that might match 3-letter pattern
+  const airportPattern = /\b[A-Za-z]{3}\b/g;
   const airports = text.match(airportPattern);
+  const excludeWords = ['air', 'the', 'and', 'for', 'you', 'are', 'can', 'may', 'new', 'old'];
+  
   if (airports && airports.length >= 2) {
-    flightData.origin = airports[0];
-    flightData.destination = airports[1];
+    // Filter out common words that aren't airport codes
+    const validAirports = airports.filter(code => 
+      !excludeWords.includes(code.toLowerCase()) && 
+      !text.toLowerCase().includes(`${code.toLowerCase()} lines`) && // Exclude "Air Lines"
+      !text.toLowerCase().includes(`${code.toLowerCase()} france`) && // Exclude "Air France"
+      !text.toLowerCase().includes(`${code.toLowerCase()} canada`) // Exclude "Air Canada"
+    );
+    
+    if (validAirports.length >= 2) {
+      flightData.origin = validAirports[0].toUpperCase();
+      flightData.destination = validAirports[1].toUpperCase();
+    }
   }
 
   // Extract date patterns (various formats)
@@ -79,10 +111,19 @@ export function parseFlightSummary(text: string): FlightData {
   }
 
   // Extract cabin class
-  const cabinClasses = ['economy', 'premium economy', 'business', 'first'];
-  for (const cabin of cabinClasses) {
-    if (text.toLowerCase().includes(cabin)) {
-      flightData.cabinClass = cabin.charAt(0).toUpperCase() + cabin.slice(1);
+  const cabinClasses = [
+    { pattern: /premium\s+economy/i, class: 'Premium Economy' },
+    { pattern: /\bfirst\s+class\b/i, class: 'First' },
+    { pattern: /\bbusiness\s+class\b/i, class: 'Business' },
+    { pattern: /\beconomy\b/i, class: 'Economy' },
+    { pattern: /\bcoach\b/i, class: 'Economy' },
+    { pattern: /\bfirst\b/i, class: 'First' },
+    { pattern: /\bbusiness\b/i, class: 'Business' }
+  ];
+  
+  for (const { pattern, class: cabinClass } of cabinClasses) {
+    if (pattern.test(text)) {
+      flightData.cabinClass = cabinClass;
       break;
     }
   }
