@@ -360,7 +360,7 @@ export function UnifiedFlightInput({
           <div 
             className={`relative flex items-center w-[800px] transition-all duration-200 ${
               isDragOver ? 'ring-2 ring-primary ring-offset-2' : ''
-            } ${pasteActive ? 'ring-2 ring-green-500 ring-offset-2' : ''}`}
+            }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -386,12 +386,6 @@ export function UnifiedFlightInput({
             {isDragOver && (
               <div className="absolute inset-0 flex items-center justify-center bg-primary/10 rounded-lg z-10">
                 <p className="text-primary font-medium text-sm">📸 Drop screenshot here</p>
-              </div>
-            )}
-            
-            {pasteActive && (
-              <div className="absolute inset-0 flex items-center justify-center bg-green-50 rounded-lg z-10">
-                <p className="text-green-600 font-medium text-sm">✅ Image pasted! Processing...</p>
               </div>
             )}
           </div>
